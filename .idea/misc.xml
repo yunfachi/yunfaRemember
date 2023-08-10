@@ -1,0 +1,23 @@
+<project version="4">
+  <component name="EntryPointsManager">
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="com.velocitypowered.api.event.Subscribe" />
+      <item index="1" class="java.lang.String" itemvalue="com.velocitypowered.api.plugin.Plugin" />
+    </list>
+    <writeAnnotations>
+      <writeAnnotation name="lombok.Getter" />
+      <writeAnnotation name="net.william278.annotaml.YamlKey" />
+    </writeAnnotations>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" default="true" project-jdk-name="16" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
