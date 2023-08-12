@@ -4,23 +4,16 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.server.PingOptions;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import com.velocitypowered.api.proxy.server.ServerPing;
-import moe.yunfachi.yunfaremember.config.Settings;
 import moe.yunfachi.yunfaremember.config.Players;
+import moe.yunfachi.yunfaremember.config.Settings;
 import net.william278.annotaml.Annotaml;
 import net.william278.desertwell.util.UpdateChecker;
 import net.william278.desertwell.util.Version;
@@ -35,13 +28,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 @Plugin(
         id = "yunfaremember",
         name = "yunfaRemember",
-        version = "1.0.1",
+        version = "1.0.2",
         description = "A velocity plugin allows you to stay on the same server when you exit",
         url = "https://modrinth.com/plugin/yunfaremember",
         authors = {"yunfachi"}

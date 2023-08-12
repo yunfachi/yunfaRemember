@@ -35,7 +35,7 @@ public class Players {
 
     @YamlKey("players")
     //private Map<String, List<String>> players = Collections.emptyMap();
-    public Map<String, Map<String, String>> players = Collections.emptyMap();
+    public HashMap<String, Map<String, String>> players = new HashMap<>();
 
     public String getLatestServer(@NotNull UUID uuid, String group) {
         try {
@@ -54,12 +54,12 @@ public class Players {
             if (players.containsKey(uuid.toString()))
                 ((Section) players.get(uuid.toString())).set(group, server);
             else
-                players.put(uuid.toString(), Map.of(group, server));
+                players.put(uuid.toString(), new HashMap<>(Map.of(group, server)));
         } catch (ClassCastException e) {
             if(players.containsKey(uuid.toString()))
                 players.get(uuid.toString()).put(group, server);
             else
-                players.put(uuid.toString(), Map.of(group, server));
+                players.put(uuid.toString(), new HashMap<>(Map.of(group, server)));
         }
         YunfaRemember.instance.savePlayers();
     }
