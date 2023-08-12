@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 @Plugin(
         id = "yunfaremember",
         name = "yunfaRemember",
-        version = "1.0.0",
+        version = "1.0.1",
         description = "A velocity plugin allows you to stay on the same server when you exit",
         url = "https://modrinth.com/plugin/yunfaremember",
         authors = {"yunfachi"}
@@ -132,36 +132,19 @@ public class YunfaRemember {
     }
 
     public void registerServers() {
-        getConfig().getServerGroups().forEach((k, v) -> {this.getServer().registerServer(new ServerInfo(k, new InetSocketAddress("127.0.0.1", getConfig().getPort())));});
-        //getConfig().getServerGroups().forEach((k, v) -> new RegisteredServer() {
-        //    @Override
-        //    public boolean sendPluginMessage(ChannelIdentifier channelIdentifier, byte[] bytes) {
-        //        return false;
-        //    }
-//
-//
-        //    @Override
-        //    public ServerInfo getServerInfo() {
-        //        return new ServerInfo(k, new InetSocketAddress("127.0.0.1", 65537));
-        //    }
-//
-        //    @Override
-        //    public Collection<Player> getPlayersConnected() {
-        //        Collection<Player> all_players = new ArrayList<>(Collections.emptyList());
-        //        getConfig().getServerGroups().forEach((k, v) -> getServer().getServer(k).ifPresent(server -> all_players.addAll(server.getPlayersConnected())));
-        //        return all_players;
-        //    }
-//
-        //    @Override
-        //    public CompletableFuture<ServerPing> ping() {
-        //        return null;
-        //    }
-//
-        //    @Override
-        //    public CompletableFuture<ServerPing> ping(PingOptions pingOptions) {
-        //        return null;
-        //    }
-        //});
+        getConfig().getServerGroups().forEach((k, v) -> {
+            this.getServer().getServer(k).ifPresentOrElse((action) -> {}, () -> {
+                this.getServer().registerServer(
+                    new ServerInfo(
+                        k, new InetSocketAddress(
+                            "127.0.0.1",
+                            getConfig().getPort()
+                        )
+                    )
+                );}
+            );
+        });
+
     }
 
     public void loadConfig() {
