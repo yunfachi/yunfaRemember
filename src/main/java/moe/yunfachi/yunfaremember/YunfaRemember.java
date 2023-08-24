@@ -30,7 +30,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Plugin(
         id = "yunfaremember",
@@ -105,16 +109,29 @@ public class YunfaRemember {
                         });
                     }
                 }
-            } else getConfig().getServerGroups().forEach((k, v) -> {
-                if(v.contains(event.getResult().getServer().get().getServerInfo().getName())) {
-                    players.setLatestServer(
-                            event.getPlayer().getUniqueId(),
-                            k,
-                            event.getResult().getServer().get().getServerInfo().getName()
-                    );
-                }
-            });
+            } else {
+                OnServerPreConnectElse(event, null);
+            }
         }
+    }
+
+    public void OnServerPreConnectElse(@NotNull ServerPreConnectEvent event, ServerPreConnectEvent.ServerResult result) {
+        if(result==null) {
+            result = event.getResult();
+        }
+        ServerPreConnectEvent.ServerResult finalResult = result;
+        settings.getServerGroups().forEach((k, v) -> {
+            if(v.contains(finalResult.getServer().get().getServerInfo().getName())) {
+                players.setLatestServer(
+                        event.getPlayer().getUniqueId(),
+                        k,
+                        finalResult.getServer().get().getServerInfo().getName()
+                );
+                if(settings.getServerGroups().containsKey(k)) {
+                    OnServerPreConnectElse(event, ServerPreConnectEvent.ServerResult.allowed(getServer().getServer(k).get()));
+                }
+            }
+        });
     }
 
     @Subscribe
