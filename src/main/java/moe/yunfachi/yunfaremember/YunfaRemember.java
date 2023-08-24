@@ -11,7 +11,9 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import moe.yunfachi.yunfaremember.commands.YunfaRememberCommand;
 import moe.yunfachi.yunfaremember.config.Players;
 import moe.yunfachi.yunfaremember.config.Settings;
 import net.william278.annotaml.Annotaml;
@@ -28,11 +30,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Plugin(
         id = "yunfaremember",
         name = "yunfaRemember",
-        version = "1.0.2",
+        version = "1.1.0",
         description = "A velocity plugin allows you to stay on the same server when you exit",
         url = "https://modrinth.com/plugin/yunfaremember",
         authors = {"yunfachi"}
@@ -76,51 +80,115 @@ public class YunfaRemember {
     public void OnServerPreConnect(@NotNull ServerPreConnectEvent event) {
         if (event.getResult().getServer().isPresent()) {
             if (settings.getServerGroups().containsKey(event.getResult().getServer().get().getServerInfo().getName())) {
-                getServer().getServer(
-                        players.getLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                event.getResult().getServer().get().getServerInfo().getName()
-                        )
-                ).ifPresentOrElse((server) -> {
-                    event.setResult(
-                            ServerPreConnectEvent.ServerResult.allowed(
-                                    server
+                while(true) {
+                    Optional<RegisteredServer> server = getServer().getServer(
+                            players.getLatestServer(
+                                    event.getPlayer().getUniqueId(),
+                                    event.getResult().getServer().get().getServerInfo().getName()
                             )
-                    );}, () -> {}
-                );
-            } else getConfig().getServerGroups().forEach((k, v) -> {
-                if(v.contains(event.getResult().getServer().get().getServerInfo().getName())) {
-                    players.setLatestServer(
-                            event.getPlayer().getUniqueId(),
-                            k,
-                            event.getResult().getServer().get().getServerInfo().getName()
                     );
+                    if(server.isPresent()) {
+                        event.setResult(
+                                ServerPreConnectEvent.ServerResult.allowed(
+                                        server.get()
+                                )
+                        );
+                        getConfig().getServerGroups().forEach((k, v) -> {
+                            if(v.contains(server.get().getServerInfo().getName())) {
+                                if(players.getLatestServer(event.getPlayer().getUniqueId(),k).equals(server.get().getServerInfo().getName())) {
+                                    players.setLatestServer(
+                                            event.getPlayer().getUniqueId(),
+                                            k,
+                                            server.get().getServerInfo().getName()
+                                    );
+                                }
+                            }
+                        });
+                        OnServerPreConnectElse(event, null);
+                        if(!settings.getServerGroups().containsKey(event.getResult().getServer().get().getServerInfo().getName()))
+                            break;
+                    }
                 }
-            });
+            } else {
+                OnServerPreConnectElse(event, null);
+            }
         }
+    }
+
+    public void OnServerPreConnectElse(@NotNull ServerPreConnectEvent event, ServerPreConnectEvent.ServerResult result) {
+        if(result==null) {
+            result = event.getResult();
+        }
+        ServerPreConnectEvent.ServerResult finalResult = result;
+        settings.getServerGroups().forEach((k, v) -> {
+            if(v.contains(finalResult.getServer().get().getServerInfo().getName())) {
+                logger.info(k + " :-: " + finalResult.getServer().get().getServerInfo().getName());
+                players.setLatestServer(
+                        event.getPlayer().getUniqueId(),
+                        k,
+                        finalResult.getServer().get().getServerInfo().getName()
+                );
+                if(settings.getServerGroups().containsKey(k)) {
+                    OnServerPreConnectElse(event, ServerPreConnectEvent.ServerResult.allowed(getServer().getServer(k).get()));
+                }
+            }
+            else {
+                logger.info(k + " -:- " + finalResult.getServer().get().getServerInfo().getName());
+            }
+        });
     }
 
     @Subscribe
     public void OnServerChoose(@NotNull PlayerChooseInitialServerEvent event) {
         if (event.getInitialServer().isPresent()) {
             if (settings.getServerGroups().containsKey(event.getInitialServer().get().getServerInfo().getName())) {
-                getServer().getServer(
-                        players.getLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                event.getInitialServer().get().getServerInfo().getName()
-                        )
-                ).ifPresentOrElse(event::setInitialServer, () -> {});
-            } else getConfig().getServerGroups().forEach((k, v) -> {
-                if(v.contains(event.getInitialServer().get().getServerInfo().getName())) {
-                    players.setLatestServer(
-                            event.getPlayer().getUniqueId(),
-                            k,
-                            event.getInitialServer().get().getServerInfo().getName()
+                while(true) {
+                    Optional<RegisteredServer> server = getServer().getServer(
+                            players.getLatestServer(
+                                    event.getPlayer().getUniqueId(),
+                                    event.getInitialServer().get().getServerInfo().getName()
+                            )
                     );
+                    if(server.isPresent()) {
+                        event.setInitialServer(server.get());
+                        if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
+                            break;
+                        getConfig().getServerGroups().forEach((k, v) -> {
+                            if(v.contains(server.get().getServerInfo().getName())) {
+                                players.setLatestServer(
+                                        event.getPlayer().getUniqueId(),
+                                        k,
+                                        server.get().getServerInfo().getName()
+                                );
+                            }
+                        });
+                    }
                 }
-            });
+            } else {
+                OnServerChooseElse(event, null);
+            }
         }
     }
+
+    public void OnServerChooseElse(@NotNull PlayerChooseInitialServerEvent event, RegisteredServer result) {
+        if(result==null) {
+            result = event.getInitialServer().get();
+        }
+        RegisteredServer finalResult = result;
+        settings.getServerGroups().forEach((k, v) -> {
+            if(v.contains(finalResult.getServerInfo().getName())) {
+                players.setLatestServer(
+                        event.getPlayer().getUniqueId(),
+                        k,
+                        finalResult.getServerInfo().getName()
+                );
+                if(settings.getServerGroups().containsKey(k)) {
+                    OnServerChooseElse(event, getServer().getServer(k).get());
+                }
+            }
+        });
+    }
+
 
     public void registerServers() {
         getConfig().getServerGroups().forEach((k, v) -> {
@@ -189,6 +257,9 @@ public class YunfaRemember {
 
     private void registerCommands() {
         final Command command = new YunfaRememberCommand(this);
+        server.getCommandManager().register(
+                "yunfaremember", command, "yremember", "yr"
+        );
         server.getCommandManager().register(
                 "yunfaremember", command, "yremember", "yr"
         );
