@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -170,6 +171,25 @@ public class YunfaRemember {
                 }
             });
         }
+    }
+
+    public void OnServerChooseElse(@NotNull PlayerChooseInitialServerEvent event, RegisteredServer result) {
+        if(result==null) {
+            result = event.getInitialServer().get();
+        }
+        RegisteredServer finalResult = result;
+        settings.getServerGroups().forEach((k, v) -> {
+            if(v.contains(finalResult.getServerInfo().getName())) {
+                players.setLatestServer(
+                        event.getPlayer().getUniqueId(),
+                        k,
+                        finalResult.getServerInfo().getName()
+                );
+                if(settings.getServerGroups().containsKey(k)) {
+                     OnServerChooseElse(event, getServer().getServer(k).get());
+                }
+            }
+        });
     }
 
     public void registerServers() {
