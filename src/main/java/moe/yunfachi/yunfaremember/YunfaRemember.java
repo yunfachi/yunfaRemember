@@ -150,15 +150,16 @@ public class YunfaRemember {
                         event.setInitialServer(server.get());
                         if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
                             break;
-                        getConfig().getServerGroups().forEach((k, v) -> {
-                            if(v.contains(server.get().getServerInfo().getName())) {
-                                players.setLatestServer(
-                                        event.getPlayer().getUniqueId(),
-                                        k,
-                                        server.get().getServerInfo().getName()
-                                );
-                            }
-                        });
+                        //getConfig().getServerGroups().forEach((k, v) -> {
+                        //    if(v.contains(server.get().getServerInfo().getName())) {
+                        //        players.setLatestServer(
+                        //                event.getPlayer().getUniqueId(),
+                        //                k,
+                        //                server.get().getServerInfo().getName()
+                        //        );
+                        //    }
+                        //});
+                        OnServerChooseElse(event, null);
                     }
                 }
             } else {
