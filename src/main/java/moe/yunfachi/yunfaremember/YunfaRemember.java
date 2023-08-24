@@ -22,6 +22,7 @@ import net.william278.desertwell.util.UpdateChecker;
 import net.william278.desertwell.util.Version;
 import org.bstats.charts.SimplePie;
 import org.bstats.velocity.Metrics;
+import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
@@ -150,16 +151,15 @@ public class YunfaRemember {
                         event.setInitialServer(server.get());
                         if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
                             break;
-                        //getConfig().getServerGroups().forEach((k, v) -> {
-                        //    if(v.contains(server.get().getServerInfo().getName())) {
-                        //        players.setLatestServer(
-                        //                event.getPlayer().getUniqueId(),
-                        //                k,
-                        //                server.get().getServerInfo().getName()
-                        //        );
-                        //    }
-                        //});
-                        OnServerChooseElse(event, null);
+                        getConfig().getServerGroups().forEach((k, v) -> {
+                            if(v.contains(server.get().getServerInfo().getName())) {
+                                players.setLatestServer(
+                                        event.getPlayer().getUniqueId(),
+                                        k,
+                                        server.get().getServerInfo().getName()
+                                );
+                            }
+                        });
                     }
                 }
             } else {
@@ -181,11 +181,12 @@ public class YunfaRemember {
                         finalResult.getServerInfo().getName()
                 );
                 if(settings.getServerGroups().containsKey(k)) {
-                     OnServerChooseElse(event, getServer().getServer(k).get());
+                    OnServerChooseElse(event, getServer().getServer(k).get());
                 }
             }
         });
     }
+
 
     public void registerServers() {
         getConfig().getServerGroups().forEach((k, v) -> {
