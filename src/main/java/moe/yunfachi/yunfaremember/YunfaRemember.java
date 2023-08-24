@@ -87,7 +87,6 @@ public class YunfaRemember {
                             )
                     );
                     if(server.isPresent()) {
-                        ServerPreConnectEvent.ServerResult prev_server = event.getResult();
                         event.setResult(
                                 ServerPreConnectEvent.ServerResult.allowed(
                                         server.get()
@@ -95,11 +94,15 @@ public class YunfaRemember {
                         );
                         if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
                             break;
-                        players.setLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                server.get().getServerInfo().getName(),
-                                prev_server.getServer().get().getServerInfo().getName()
-                        );
+                        getConfig().getServerGroups().forEach((k, v) -> {
+                            if(v.contains(server.get().getServerInfo().getName())) {
+                                players.setLatestServer(
+                                        event.getPlayer().getUniqueId(),
+                                        k,
+                                        server.get().getServerInfo().getName()
+                                );
+                            }
+                        });
                     }
                 }
             } else getConfig().getServerGroups().forEach((k, v) -> {
@@ -126,15 +129,18 @@ public class YunfaRemember {
                             )
                     );
                     if(server.isPresent()) {
-                        RegisteredServer prev_server = server.get();
                         event.setInitialServer(server.get());
                         if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
                             break;
-                        players.setLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                server.get().getServerInfo().getName(),
-                                prev_server.getServerInfo().getName()
-                        );
+                        getConfig().getServerGroups().forEach((k, v) -> {
+                            if(v.contains(server.get().getServerInfo().getName())) {
+                                players.setLatestServer(
+                                        event.getPlayer().getUniqueId(),
+                                        k,
+                                        server.get().getServerInfo().getName()
+                                );
+                            }
+                        });
                     }
                 }
             } else getConfig().getServerGroups().forEach((k, v) -> {
