@@ -161,15 +161,9 @@ public class YunfaRemember {
                         });
                     }
                 }
-            } else getConfig().getServerGroups().forEach((k, v) -> {
-                if(v.contains(event.getInitialServer().get().getServerInfo().getName())) {
-                    players.setLatestServer(
-                            event.getPlayer().getUniqueId(),
-                            k,
-                            event.getInitialServer().get().getServerInfo().getName()
-                    );
-                }
-            });
+            } else {
+                OnServerChooseElse(event, null);
+            }
         }
     }
 
