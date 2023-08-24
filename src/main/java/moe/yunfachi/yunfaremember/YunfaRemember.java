@@ -11,7 +11,9 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import moe.yunfachi.yunfaremember.commands.YunfaRememberCommand;
 import moe.yunfachi.yunfaremember.config.Players;
 import moe.yunfachi.yunfaremember.config.Settings;
 import net.william278.annotaml.Annotaml;
@@ -28,11 +30,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.Optional;
 
 @Plugin(
         id = "yunfaremember",
         name = "yunfaRemember",
-        version = "1.0.2",
+        version = "1.1.0",
         description = "A velocity plugin allows you to stay on the same server when you exit",
         url = "https://modrinth.com/plugin/yunfaremember",
         authors = {"yunfachi"}
@@ -76,18 +79,23 @@ public class YunfaRemember {
     public void OnServerPreConnect(@NotNull ServerPreConnectEvent event) {
         if (event.getResult().getServer().isPresent()) {
             if (settings.getServerGroups().containsKey(event.getResult().getServer().get().getServerInfo().getName())) {
-                getServer().getServer(
-                        players.getLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                event.getResult().getServer().get().getServerInfo().getName()
-                        )
-                ).ifPresentOrElse((server) -> {
-                    event.setResult(
-                            ServerPreConnectEvent.ServerResult.allowed(
-                                    server
+                while(true) {
+                    Optional<RegisteredServer> server = getServer().getServer(
+                            players.getLatestServer(
+                                    event.getPlayer().getUniqueId(),
+                                    event.getResult().getServer().get().getServerInfo().getName()
                             )
-                    );}, () -> {}
-                );
+                    );
+                    if (server.isPresent()) {
+                        event.setResult(
+                                ServerPreConnectEvent.ServerResult.allowed(
+                                        server.get()
+                                )
+                        );
+                        if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
+                            break;
+                    }
+                }
             } else getConfig().getServerGroups().forEach((k, v) -> {
                 if(v.contains(event.getResult().getServer().get().getServerInfo().getName())) {
                     players.setLatestServer(
@@ -104,12 +112,19 @@ public class YunfaRemember {
     public void OnServerChoose(@NotNull PlayerChooseInitialServerEvent event) {
         if (event.getInitialServer().isPresent()) {
             if (settings.getServerGroups().containsKey(event.getInitialServer().get().getServerInfo().getName())) {
-                getServer().getServer(
-                        players.getLatestServer(
-                                event.getPlayer().getUniqueId(),
-                                event.getInitialServer().get().getServerInfo().getName()
-                        )
-                ).ifPresentOrElse(event::setInitialServer, () -> {});
+                while(true) {
+                    Optional<RegisteredServer> server = getServer().getServer(
+                            players.getLatestServer(
+                                    event.getPlayer().getUniqueId(),
+                                    event.getInitialServer().get().getServerInfo().getName()
+                            )
+                    );
+                    if(server.isPresent()) {
+                        event.setInitialServer(server.get());
+                        if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
+                            break;
+                    }
+                }
             } else getConfig().getServerGroups().forEach((k, v) -> {
                 if(v.contains(event.getInitialServer().get().getServerInfo().getName())) {
                     players.setLatestServer(
@@ -189,6 +204,9 @@ public class YunfaRemember {
 
     private void registerCommands() {
         final Command command = new YunfaRememberCommand(this);
+        server.getCommandManager().register(
+                "yunfaremember", command, "yremember", "yr"
+        );
         server.getCommandManager().register(
                 "yunfaremember", command, "yremember", "yr"
         );
