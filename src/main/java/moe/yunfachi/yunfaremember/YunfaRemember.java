@@ -10,7 +10,6 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -22,7 +21,6 @@ import net.william278.desertwell.util.UpdateChecker;
 import net.william278.desertwell.util.Version;
 import org.bstats.charts.SimplePie;
 import org.bstats.velocity.Metrics;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
@@ -32,11 +30,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Plugin(
         id = "yunfaremember",
@@ -98,17 +93,20 @@ public class YunfaRemember {
                                         server.get()
                                 )
                         );
-                        if(!settings.getServerGroups().containsKey(server.get().getServerInfo().getName()))
-                            break;
                         getConfig().getServerGroups().forEach((k, v) -> {
                             if(v.contains(server.get().getServerInfo().getName())) {
-                                players.setLatestServer(
-                                        event.getPlayer().getUniqueId(),
-                                        k,
-                                        server.get().getServerInfo().getName()
-                                );
+                                if(players.getLatestServer(event.getPlayer().getUniqueId(),k).equals(server.get().getServerInfo().getName())) {
+                                    players.setLatestServer(
+                                            event.getPlayer().getUniqueId(),
+                                            k,
+                                            server.get().getServerInfo().getName()
+                                    );
+                                }
                             }
                         });
+                        OnServerPreConnectElse(event, null);
+                        if(!settings.getServerGroups().containsKey(event.getResult().getServer().get().getServerInfo().getName()))
+                            break;
                     }
                 }
             } else {
@@ -124,6 +122,7 @@ public class YunfaRemember {
         ServerPreConnectEvent.ServerResult finalResult = result;
         settings.getServerGroups().forEach((k, v) -> {
             if(v.contains(finalResult.getServer().get().getServerInfo().getName())) {
+                logger.info(k + " :-: " + finalResult.getServer().get().getServerInfo().getName());
                 players.setLatestServer(
                         event.getPlayer().getUniqueId(),
                         k,
@@ -132,6 +131,9 @@ public class YunfaRemember {
                 if(settings.getServerGroups().containsKey(k)) {
                     OnServerPreConnectElse(event, ServerPreConnectEvent.ServerResult.allowed(getServer().getServer(k).get()));
                 }
+            }
+            else {
+                logger.info(k + " -:- " + finalResult.getServer().get().getServerInfo().getName());
             }
         });
     }
