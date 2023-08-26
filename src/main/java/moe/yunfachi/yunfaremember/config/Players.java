@@ -68,7 +68,7 @@ public class Players {
         YunfaRemember.instance.savePlayers();
     }
     public String getServer(String serverName) {
-        if(YunfaRemember.instance.getConfig().getServerGroups().containsKey(server))
+        if(YunfaRemember.instance.getConfig().getServerGroups().containsKey(serverName))
             return server;
         Optional<RegisteredServer> server = YunfaRemember.instance.getServer().getServer(serverName);
         String fallback = YunfaRemember.instance.getConfig().getFallback();
@@ -76,11 +76,9 @@ public class Players {
             Socket s = new Socket();
             s.connect(new InetSocketAddress(server.get().getServerInfo().getAddress().getHostString(), server.get().getServerInfo().getAddress().getPort()), 15);
             s.close();
-            return server;
-        catch (UnknownHostException e) {
-            return (fallback.equals("") ? server : fallback);
-        } catch (IOException e) {
-            return (fallback.equals("") ? server : fallback);
+            return serverName;
+        } catch (UnknownHostException|IOException e) {
+            return (fallback.equals("") ? serverName : fallback);
         }
     }
 }
