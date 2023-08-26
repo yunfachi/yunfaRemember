@@ -87,6 +87,7 @@ public class YunfaRemember {
                                     event.getResult().getServer().get().getServerInfo().getName()
                             )
                     );
+                    
                     if(server.isPresent()) {
                         event.setResult(
                                 ServerPreConnectEvent.ServerResult.allowed(
@@ -122,7 +123,6 @@ public class YunfaRemember {
         ServerPreConnectEvent.ServerResult finalResult = result;
         settings.getServerGroups().forEach((k, v) -> {
             if(v.contains(finalResult.getServer().get().getServerInfo().getName())) {
-                logger.info(k + " :-: " + finalResult.getServer().get().getServerInfo().getName());
                 players.setLatestServer(
                         event.getPlayer().getUniqueId(),
                         k,
@@ -132,9 +132,7 @@ public class YunfaRemember {
                     OnServerPreConnectElse(event, ServerPreConnectEvent.ServerResult.allowed(getServer().getServer(k).get()));
                 }
             }
-            else {
-                logger.info(k + " -:- " + finalResult.getServer().get().getServerInfo().getName());
-            }
+            else {}
         });
     }
 
