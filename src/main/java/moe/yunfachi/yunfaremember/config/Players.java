@@ -11,7 +11,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import java.io.File;
 import java.util.Optional;
-import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.*;
 import java.net.Socket;
@@ -69,7 +68,7 @@ public class Players {
     }
     public String getServer(String serverName) {
         if(YunfaRemember.instance.getConfig().getServerGroups().containsKey(serverName))
-            return server;
+            return serverName;
         Optional<RegisteredServer> server = YunfaRemember.instance.getServer().getServer(serverName);
         String fallback = YunfaRemember.instance.getConfig().getFallback();
         try {
@@ -77,7 +76,7 @@ public class Players {
             s.connect(new InetSocketAddress(server.get().getServerInfo().getAddress().getHostString(), server.get().getServerInfo().getAddress().getPort()), 15);
             s.close();
             return serverName;
-        } catch (UnknownHostException|IOException e) {
+        } catch (IOException e) {
             return (fallback.equals("") ? serverName : fallback);
         }
     }
