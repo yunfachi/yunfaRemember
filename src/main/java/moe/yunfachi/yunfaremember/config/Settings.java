@@ -45,6 +45,10 @@ public class Settings {
     @YamlKey("storage_type")
     private String storageType = "FILE";
 
+    @YamlComment("Those who could not enter the server from the group will go here. It can be a group or a server. \"\" to disable")
+    @YamlKey("fallback")
+    private String fallback = "";
+
     @YamlComment("Groups with servers that will be connected, the group name must be different from the name of the servers, because for correct work it will be necessary to connect to the name of the group, instead of the name of the server.\n# keep order, because new players will go to the first server from the group")
     @YamlKey("server_groups")
     private Map<String, List<String>> serverGroups;
@@ -57,6 +61,10 @@ public class Settings {
 
     public String getStorageType() {
         return storageType;
+    }
+
+    public String getFallback() {
+        return fallback;
     }
 
     public Map<String, List<String>> getServerGroups() {

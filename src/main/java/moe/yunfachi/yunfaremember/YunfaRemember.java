@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Plugin(
         id = "yunfaremember",
         name = "yunfaRemember",
-        version = "1.1.0",
+        version = "1.1.1",
         description = "A velocity plugin allows you to stay on the same server when you exit",
         url = "https://modrinth.com/plugin/yunfaremember",
         authors = {"yunfachi"}

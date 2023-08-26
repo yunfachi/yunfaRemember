@@ -7,8 +7,10 @@ import net.william278.annotaml.Annotaml;
 import net.william278.annotaml.YamlFile;
 import net.william278.annotaml.YamlKey;
 import org.jetbrains.annotations.NotNull;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import java.io.File;
+import java.util.Optional;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,7 +34,6 @@ public class Players {
     public Players() {
     }
 
-
     @YamlKey("players")
     //private Map<String, List<String>> players = Collections.emptyMap();
     public HashMap<String, Map<String, String>> players = new HashMap<>();
@@ -41,11 +42,11 @@ public class Players {
         try {
             if (players.containsKey(uuid.toString()))
                 if (((Section) players.get(uuid.toString())).contains(group))
-                    return (String) ((Section) players.get(uuid.toString())).get(group);
+                    return getServer((String) ((Section) players.get(uuid.toString())).get(group));
         } catch (ClassCastException e) {
             if (players.containsKey(uuid.toString()))
                 if (players.get(uuid.toString()).containsKey(group))
-                    return players.get(uuid.toString()).get(group);
+                    return getServer(players.get(uuid.toString()).get(group));
         }
         return YunfaRemember.instance.getConfig().getServerGroups().get(group).get(0);
     }
@@ -62,5 +63,10 @@ public class Players {
                 players.put(uuid.toString(), new HashMap<>(Map.of(group, server)));
         }
         YunfaRemember.instance.savePlayers();
+    }
+    public String getServer(String serverName) {
+        Optional<RegistredServer> server = YunfaRemember.instance.getServer().getServer(serverName)
+        String fallback = YunfaRemember.getConfig().getFallback();
+        return (server.isPresent() ? server : (fallback.equals("") ? server : fallback))
     }
 }
